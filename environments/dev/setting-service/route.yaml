@@ -1,0 +1,16 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: setting-service
+  namespace: nasruddinkhan786-dev
+  annotations:
+    haproxy.router.openshift.io/timeout: 120s
+spec:
+  path: /setting-service
+  to:
+    kind: Service
+    name: setting-service
+  port:
+    targetPort: http
+  tls:
+    termination: edge

@@ -1,0 +1,3 @@
+resources:
+  - oracle.yaml
+  - setting-service.yaml

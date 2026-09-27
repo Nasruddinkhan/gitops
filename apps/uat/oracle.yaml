@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: oracle-db-uat
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Nasruddinkhan/gitops.git
+    targetRevision: main
+    path: environments/uat/oracle
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: nasruddin-khan-uat
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

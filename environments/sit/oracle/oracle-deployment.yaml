@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: oracle-db-secret
+  namespace: nasruddin-khan-sit
+type: Opaque
+stringData:
+  ORACLE_PASSWORD: oracleRootPassword
+  APP_USER: CONFIG_SERVICE
+  APP_USER_PASSWORD: configServicePassword
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: oracle-db-data
+  namespace: nasruddin-khan-sit
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oracle-db
+  namespace: nasruddin-khan-sit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oracle-db
+  template:
+    metadata:
+      labels:
+        app: oracle-db
+    spec:
+      containers:
+        - name: oracle-db
+          image: gvenzl/oracle-free:23-slim
+          ports:
+            - containerPort: 1521
+              name: oracle
+          envFrom:
+            - secretRef:
+                name: oracle-db-secret
+          volumeMounts:
+            - name: oracle-data
+              mountPath: /opt/oracle/oradata
+          startupProbe:
+            tcpSocket:
+              port: 1521
+            periodSeconds: 10
+            failureThreshold: 60
+          readinessProbe:
+            tcpSocket:
+              port: 1521
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            tcpSocket:
+              port: 1521
+            periodSeconds: 30
+            failureThreshold: 5
+      volumes:
+        - name: oracle-data
+          persistentVolumeClaim:
+            claimName: oracle-db-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oracle-db
+  namespace: nasruddin-khan-sit
+spec:
+  selector:
+    app: oracle-db
+  ports:
+    - name: oracle
+      port: 1521
+      targetPort: 1521

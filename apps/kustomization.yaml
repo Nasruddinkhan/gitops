@@ -1,0 +1,7 @@
+# Keep only one environment active at a time.
+# To switch environment, uncomment the target folder and comment the others.
+resources:
+  - dev
+#  - sit
+#  - uat
+#  - prod

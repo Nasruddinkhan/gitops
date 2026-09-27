@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: setting-service
+  namespace: nasruddin-khan-uat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: setting-service
+  template:
+    metadata:
+      labels:
+        app: setting-service
+    spec:
+      containers:
+        - name: setting-service
+          image: docker.io/nasruddinkhan/setting-service:uat
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: uat
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:oracle:thin:@//oracle-db:1521/FREEPDB1
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: oracle-db-secret
+                  key: APP_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: oracle-db-secret
+                  key: APP_USER_PASSWORD
+          readinessProbe:
+            httpGet:
+              path: /setting-service/actuator/health
+              port: 8080
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /setting-service/actuator/health
+              port: 8080
+            periodSeconds: 30
+            failureThreshold: 5
